@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* src/index.css */
+:root {
+  color-scheme: light dark;
+}
+
+html {
+  font-family: sans-serif,Quicksand, Montserrat;
+}
+
+body {
+  background: #ffffff;
+  height: 100vh;
+  color: black;
+}

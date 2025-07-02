@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset 
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+>
+  <url>
+    <loc>https://chibiquiles.netlify.app/</loc>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://chibiquiles.netlify.app/Top</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://chibiquiles.netlify.app/Pines</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://chibiquiles.netlify.app/Llaveros</loc>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://chibiquiles.netlify.app/Blog</loc>
+    <priority>0.70</priority>
+  </url>
+  <url>
+    <loc>https://chibiquiles.netlify.app/Carrito</loc>
+    <priority>0.60</priority>
+  </url>
+  <url>
+    <loc>https://chibiquiles.netlify.app/Login</loc>
+    <priority>0.40</priority>
+  </url>
+  <url>
+    <loc>https://chibiquiles.netlify.app/Registro</loc>
+    <priority>0.40</priority>
+  </url>
+</urlset>
