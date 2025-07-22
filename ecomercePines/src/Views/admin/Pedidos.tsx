@@ -20,6 +20,9 @@ export default function PedidosPage() {
     fetch(`${import.meta.env.VITE_BACKEND_URL}/api/pedidos`)
       .then((res) => res.json())
       .then((data) => {
+        if (!Array.isArray(data)) {
+    throw new Error("La respuesta no es una lista de pedidos");
+  }
         const mapped = data.map((item: any) => ({
           id: item.id,
           cliente: item.cliente_nombre,

@@ -1,53 +1,91 @@
-//cambios aqui
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+// src/context/AuthContext.tsx
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 type UserData = {
-  correo: string;
+  id: number;
+  correo?: string;
   nombre?: string;
   rol?: number;
-  photo?: string;
   [key: string]: any;
 };
 
 type AuthContextType = {
-  signInWithPassword: (correo: string, contraseña: string) => Promise<any>;
-  signUp: (correo: string, contraseña: string, nombre: string) => Promise<any>;
+  signInWithPassword: (
+    correo: string,
+    contraseña: string
+  ) => Promise<any>;
+  signUp: (
+    correo: string,
+    contraseña: string,
+    nombre: string
+  ) => Promise<any>;
   signInWithGoogle: () => void;
   signOut: () => void;
   user: UserData | null;
   loading: boolean;
 };
 
-const AuthContext = createContext<AuthContextType>({} as AuthContextType);
+const AuthContext = createContext<AuthContextType>(
+  {} as AuthContextType
+);
 
-export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
+export const AuthContextProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const googleUser = localStorage.getItem("google_user");
+useEffect(() => {
+  const token = localStorage.getItem("token");
+  const googleUser = localStorage.getItem("google_user");
 
-    if (token) {
+  if (token) {
+    try {
       const decoded: UserData = jwtDecode(token);
       setUser(decoded);
-    } else if (googleUser) {
-      const parsed = JSON.parse(googleUser);
-      setUser(parsed);
+      localStorage.setItem("rol", decoded.rol?.toString() || "");
+    } catch (e) {
+      console.error("Token inválido:", e);
+      localStorage.removeItem("token");
+      localStorage.removeItem("rol");
+      setUser(null);
     }
+  } else if (googleUser) {
+    const parsed = JSON.parse(googleUser);
+    setUser(parsed);
+  } else {
+    setUser(null);
+  }
 
-    setLoading(false);
-  }, []);
+  setLoading(false);
+}, []);
 
-  const signUp = async (correo: string, contraseña: string, nombre: string) => {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/registro`, { //PENDIENTE VER LA RUTA
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ correo, contraseña, nombre }),
-    });
+
+
+  const signUp = async (
+    correo: string,
+    contraseña: string,
+    nombre: string
+  ) => {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/auth/registro`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ correo, contraseña, nombre }),
+      }
+    );
 
     if (!response.ok) {
       const data = await response.json();
@@ -58,37 +96,47 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
 const signInWithPassword = async (email: string, password: string) => {
-  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {//PENDIENTE VER LA RUTA
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       correo: email,
-      contraseña: password
+      contraseña: password,
     }),
   });
 
+  const data = await response.json();
 
-    const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.mensaje || "Credenciales incorrectas");
+  }
 
-    if (!response.ok) {
-      throw new Error(data.mensaje || "Credenciales incorrectas");
-    }
+  const { token, rol, nombre } = data;
 
-    const { token } = data;
-    localStorage.setItem("token", token);
+  localStorage.setItem("token", token);
+  localStorage.setItem("rol", rol?.toString() || "");
+  localStorage.setItem("nombre", nombre || "");
+ // Forzar recarga
+  //window.location.reload();
+  const decoded: UserData = jwtDecode(token);
+  setUser(decoded);
 
-    const decoded: UserData = jwtDecode(token);
-    setUser(decoded);
+  return decoded;
+};
 
-    return decoded;
-  };
+const signInWithGoogle = () => {
+  window.location.href = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
+};
 
-  const signInWithGoogle = () => {
-    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
-  };
+
+
+  // const signInWithGoogle = () => {
+  //   window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+  // };
 
   const signOut = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("rol");
     localStorage.removeItem("google_user");
     setUser(null);
     navigate("/Login", { replace: true });
@@ -96,7 +144,14 @@ const signInWithPassword = async (email: string, password: string) => {
 
   return (
     <AuthContext.Provider
-      value={{ signUp, signInWithPassword, signInWithGoogle, signOut, user, loading }}
+      value={{
+        signUp,
+        signInWithPassword,
+        signInWithGoogle,
+        signOut,
+        user,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>

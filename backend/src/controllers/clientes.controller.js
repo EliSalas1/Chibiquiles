@@ -36,6 +36,36 @@ async function getAllClientes(req, res) {
   }
 }
 
+// ✅ NUEVA FUNCIÓN
+async function getClienteByUsuarioId(req, res) {
+  try {
+    await poolConnect;
+
+    const { usuarioId } = req.params;
+
+    const result = await pool.request()
+      .input("usuarioId", sql.Int, usuarioId)
+      .query(`
+        SELECT TOP 1 id
+        FROM clientes
+        WHERE usuario_id = @usuarioId
+      `);
+
+    const cliente = result.recordset[0];
+
+    if (!cliente) {
+      return res.status(404).json({ mensaje: "Cliente no encontrado." });
+    }
+
+    res.json({ clienteId: cliente.id });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al buscar cliente por usuarioId." });
+  }
+}
+
 module.exports = {
   getAllClientes,
+  getClienteByUsuarioId, // ✅ AGREGA ESTA EXPORTACIÓN
 };

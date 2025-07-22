@@ -33,12 +33,18 @@ const loginUsuario = async (req, res) => {
       { expiresIn: '2h' }
     );
 
-    res.json({
-      mensaje: 'Login exitoso',
-      token,
-      rol: usuario.roles_usuarios,
-      nombre: usuario.nombre
-    });
+    return res.json({
+  token,
+  rol: Number(usuario.roles_usuarios),
+  nombre: usuario.nombre
+});
+
+    // res.json({
+    //   mensaje: 'Login exitoso',
+    //   token,
+    //   rol: usuario.roles_usuarios,
+    //   nombre: usuario.nombre
+    // });
 
   } catch (error) {
     console.error('Error al iniciar sesión:', error);
@@ -48,6 +54,8 @@ const loginUsuario = async (req, res) => {
 
 
 // Registrar usuario
+
+// auth.controller.js
 const registrarUsuario = async (req, res) => {
   try {
     await poolConnect;
@@ -60,14 +68,29 @@ const registrarUsuario = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(contraseña, 10);
 
-    await pool.request()
+    // insertar en usuarios
+    const userResult = await pool.request()
       .input('correo', sql.VarChar, correo)
       .input('contraseña', sql.VarChar, hashedPassword)
       .input('nombre', sql.VarChar, nombre)
-      .input('rol', sql.Int, 2) // 2 = cliente por ahorajijiji
+      .input('rol', sql.Int, 2)
       .query(`
         INSERT INTO usuarios (nombre, correo, contraseña, roles_usuarios)
+        OUTPUT INSERTED.id
         VALUES (@nombre, @correo, @contraseña, @rol)
+      `);
+
+    const nuevoUserId = userResult.recordset[0].id;
+
+    // insertar en clientes (¡clave!)
+    await pool.request()
+      .input('usuario_id', sql.Int, nuevoUserId)
+      .input('telefono', sql.VarChar, null)
+      .input('fecha_nacimiento', sql.Date, null)
+      .input('genero', sql.VarChar, null)
+      .query(`
+        INSERT INTO clientes (usuario_id, telefono, fecha_nacimiento, genero)
+        VALUES (@usuario_id, @telefono, @fecha_nacimiento, @genero)
       `);
 
     res.status(201).json({ mensaje: 'Usuario registrado exitosamente' });
@@ -78,9 +101,79 @@ const registrarUsuario = async (req, res) => {
   }
 };
 
+const googleCallback = async (req, res) => {
+  try {
+    console.log("✅ Entró a googleCallback");
+    console.log("Datos Google:", req.user);
+
+    const { email, name, photo } = req.user;
+
+    await poolConnect;
+
+    const result = await pool.request()
+      .input('correo', sql.VarChar, email)
+      .query(`
+        SELECT * FROM usuarios WHERE correo = @correo
+      `);
+
+    let userId;
+
+    if (result.recordset.length === 0) {
+      const insertUser = await pool.request()
+        .input('correo', sql.VarChar, email)
+        .input('contraseña', sql.VarChar, '') 
+        .input('nombre', sql.VarChar, name)
+        .input('rol', sql.Int, 2)
+        .query(`
+          INSERT INTO usuarios (nombre, correo, contraseña, roles_usuarios)
+          OUTPUT INSERTED.id
+          VALUES (@nombre, @correo, @contraseña, @rol)
+        `);
+
+      userId = insertUser.recordset[0].id;
+
+      await pool.request()
+        .input('usuario_id', sql.Int, userId)
+        .input('telefono', sql.VarChar, null)
+        .input('fecha_nacimiento', sql.Date, null)
+        .input('genero', sql.VarChar, null)
+        .query(`
+          INSERT INTO clientes (usuario_id, telefono, fecha_nacimiento, genero)
+          VALUES (@usuario_id, @telefono, @fecha_nacimiento, @genero)
+        `);
+    } else {
+      userId = result.recordset[0].id;
+    }
+
+    const token = jwt.sign(
+      {
+        id: userId,
+        correo: email,
+        rol: 2
+      },
+      JWT_SECRET,
+      { expiresIn: '2h' }
+    );
+
+    res.redirect(
+      `http://localhost:5173/auth/success` +
+      `?token=${token}` +
+      `&rol=2` +
+      `&email=${encodeURIComponent(email)}` +
+      `&name=${encodeURIComponent(name)}` +
+      `&photo=${encodeURIComponent(photo || '')}`
+    );
+
+  } catch (error) {
+    console.error('Error en googleCallback:', error);
+    res.redirect('/login');
+  }
+};
+
 module.exports = {
   loginUsuario,
-  registrarUsuario
+  registrarUsuario,
+  googleCallback
 };
 
 

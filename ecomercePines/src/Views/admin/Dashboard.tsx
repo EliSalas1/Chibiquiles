@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import SideBar from "../../components/SideBar";
 import HeaderAdmi from "../../components/HeaderAdmi";
+import UpcomingHolidays from "../../components/UpcomingHolidays";
+
 import {
   ShoppingCart,
   DollarSign,
@@ -90,6 +92,8 @@ export default function Dashboard() {
         <main className="flex-1 p-10 overflow-auto">
           {activeSection === "resumen" && dashboardData && (
             <>
+            <UpcomingHolidays />
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
                 {[
                   {

@@ -19,7 +19,7 @@ export default function LlaverosPage() {
         {/* Título centrado */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-center w-fit mx-auto">
-            Destacados
+            Llaveros Destacados
           </h2>
           <div className="w-48 h-1 bg-orange-400 mx-auto mt-2 rounded"></div>
         </div>

@@ -1,4 +1,4 @@
-//pedidos.controller.js
+const service = require("../services/pedidos.service");
 const { pool, poolConnect } = require("../config/db");
 
 async function getAllPedidos(req, res) {
@@ -6,18 +6,20 @@ async function getAllPedidos(req, res) {
     await poolConnect;
 
     const result = await pool.request().query(`
-      SELECT
-        pedidos.id,
-        usuarios.nombre AS cliente_nombre,
-        pedidos.created_at,
-        pedidos.estado,
-        pedidos.total
-      FROM pedidos
-      INNER JOIN clientes ON pedidos.cliente_id = clientes.id
-      INNER JOIN usuarios ON clientes.usuario_id = usuarios.id
-    `);
+  SELECT
+    pedidos.id,
+    ISNULL(usuarios.nombre, 'Desconocido') AS cliente_nombre,
+    pedidos.created_at,
+    pedidos.estado,
+    pedidos.total
+  FROM pedidos
+  LEFT JOIN clientes ON pedidos.cliente_id = clientes.id
+  LEFT JOIN usuarios ON clientes.usuario_id = usuarios.id
+`);
+
 
     res.json(result.recordset);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -27,6 +29,23 @@ async function getAllPedidos(req, res) {
   }
 }
 
+// ✅ NUEVO - CREAR PEDIDO
+async function createPedido(req, res) {
+  try {
+    //lee más cosas
+    const { clienteId, items, total, direccionId, estado } = req.body;
+
+    await service.createPedido(clienteId, items, total, direccionId, estado);
+
+    res.json({ mensaje: "Pedido creado con éxito" });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al crear pedido" });
+  }
+}
+
 module.exports = {
-  getAllPedidos
+  getAllPedidos,
+  createPedido
 };

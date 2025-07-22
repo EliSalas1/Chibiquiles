@@ -5,7 +5,7 @@ export const createPayment = async (products: {
   quantity: number;
 }[]) => {
   try {
-    const response = await fetch(import.meta.env.VITE_BACKEND_URL+'/create_payment', {
+    const response = await fetch(import.meta.env.VITE_BACKEND_URL+'/api/mercado-pago/create_payment', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

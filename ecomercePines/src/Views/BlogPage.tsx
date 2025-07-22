@@ -81,7 +81,6 @@ const BlogDetailsSection: React.FC = () => {
               <p className="mt-4">
                 ¡Un buen pin puede durar años si lo cuidas como se merece! ✨
               </p>
-              <img src="/blog/cuidar.jpg" className="w-full mt-4 rounded" />
             </div>
 
             {/* Artículo 2 */}
@@ -105,10 +104,6 @@ const BlogDetailsSection: React.FC = () => {
               <p className="mt-4">
                 ¡Tus llaveros también hablan de tu estilo! 💛
               </p>
-              <img
-                src="/blog/formascreativas.jpg"
-                className="w-full mt-4 rounded"
-              />
             </div>
 
             {/* Artículo 3 */}
@@ -132,10 +127,6 @@ const BlogDetailsSection: React.FC = () => {
               <p className="mt-4">
                 Y lo más importante: elige el que te haga sonreír. 🧡
               </p>
-              <img
-                src="/blog/escogermoc.jpg"
-                className="w-full mt-4 rounded"
-              />
             </div>
           </div>
         </div>

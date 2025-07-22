@@ -18,12 +18,15 @@ import Pedidos from './Views/admin/Pedidos'
 import Clientes from './Views/admin/Clientes'
 import Analisis from './Views/admin/Analisis'
 import AdminWrapper from "./layouts/AdminWrapper";
+import CarritoPage from './Views/CarritoPage'
+
 
 
 export default function AppRouter() {
   return (
     <Routes>
   <Route path="/auth/success" element={<AuthSuccess />} />
+  
   <Route path="/Login" element={<LoginPage />} />
   <Route path="/Registro" element={<RegistroPage />} />
 
@@ -34,6 +37,7 @@ export default function AppRouter() {
     <Route path="/Pines" element={<PinesPage />} />
     <Route path="/Llaveros" element={<LlaverosPage />} />
     <Route path="/Blog" element={<BlogPage />} />
+    <Route path="/Carrito" element={<CarritoPage />} />
     <Route path="/Compra" element={<CompraPage />} />
     <Route path="/Detalles/:id" element={<DetallesPage />} />
     <Route path="/pago-exitoso" element={<PagoExitoso />} />

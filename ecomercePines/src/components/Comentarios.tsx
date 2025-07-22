@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { agregarOpinion } from "../services/api"; // Ajusta la ruta según tu proyecto
+import { agregarOpinion } from "../services/api";
 import { UserAuth } from "../context/AuthContext";
 
 type Comentario = {
@@ -13,23 +13,35 @@ type Comentario = {
 type Props = {
   productoId: number;
   opiniones: Comentario[];
-  onOpinionAdded?: () => void; // opcional, para refrescar desde el padre
+  onOpinionAdded?: () => void;
 };
 
-export default function Comentarios({ productoId, opiniones, onOpinionAdded }: Props) {
+export default function Comentarios({
+  productoId,
+  opiniones,
+  onOpinionAdded,
+}: Props) {
   const [comentario, setComentario] = useState("");
   const [calificacion, setCalificacion] = useState(5);
   const [enviando, setEnviando] = useState(false);
   const { user } = UserAuth();
+
   const handleEnviar = async () => {
     if (!comentario.trim()) {
       alert("Por favor escribe un comentario.");
       return;
     }
 
+    if (!user?.id) {
+      alert("Debes iniciar sesión para dejar una opinión.");
+      return;
+    }
+
     setEnviando(true);
     try {
-      await agregarOpinion(productoId, calificacion, comentario, user.id);
+      //await agregarOpinion(productoId, calificacion, comentario, user?.clienteId);
+      await agregarOpinion(productoId, calificacion, comentario, user?.clienteId);
+
       alert("¡Comentario enviado!");
       setComentario("");
       setCalificacion(5);
@@ -44,7 +56,9 @@ export default function Comentarios({ productoId, opiniones, onOpinionAdded }: P
 
   return (
     <div className="max-w-6xl mx-auto px-4 mt-10">
-      <h4 className="text-xl font-semibold text-[#14213D] mb-4">Comentarios</h4>
+      <h4 className="text-xl font-semibold text-[#14213D] mb-4">
+        Comentarios
+      </h4>
 
       {/* Lista de comentarios */}
       {opiniones.length > 0 ? (
@@ -59,43 +73,53 @@ export default function Comentarios({ productoId, opiniones, onOpinionAdded }: P
           ))}
         </ul>
       ) : (
-        <p className="text-gray-600 mb-6">Sé el primero en dejar una opinión.</p>
+        <p className="text-gray-600 mb-6">
+          Sé el primero en dejar una opinión.
+        </p>
       )}
 
-      {/* Formulario */}
-      <div className="bg-white p-4 rounded-md shadow space-y-4">
-        <div>
-          <label className="block mb-1 font-medium text-[#0A0908]">Calificación</label>
-          <select
-            value={calificacion}
-            onChange={(e) => setCalificacion(Number(e.target.value))}
-            className="border rounded p-2 w-full"
+      {/* Formulario SIEMPRE visible si es cliente */}
+      {user?.rol === 2 && (
+        <div className="bg-white p-4 rounded-md shadow space-y-4">
+          <div>
+            <label className="block mb-1 font-medium text-[#0A0908]">
+              Calificación
+            </label>
+            <select
+              value={calificacion}
+              onChange={(e) => setCalificacion(Number(e.target.value))}
+              className="border rounded p-2 w-full"
+            >
+              {[5, 4, 3, 2, 1].map((num) => (
+                <option key={num} value={num}>
+                  {num} estrellas
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium text-[#0A0908]">
+              Comentario
+            </label>
+            <textarea
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value)}
+              rows={3}
+              className="w-full border rounded p-2"
+              placeholder="Escribe tu opinión aquí..."
+            />
+          </div>
+
+          <button
+            onClick={handleEnviar}
+            disabled={enviando}
+            className="bg-[#FCA311] hover:bg-[#e6950e] text-white font-semibold px-6 py-2 rounded-md transition-all"
           >
-            {[5, 4, 3, 2, 1].map((num) => (
-              <option key={num} value={num}>{num} estrellas</option>
-            ))}
-          </select>
+            {enviando ? "Enviando..." : "Enviar comentario"}
+          </button>
         </div>
-
-        <div>
-          <label className="block mb-1 font-medium text-[#0A0908]">Comentario</label>
-          <textarea
-            value={comentario}
-            onChange={(e) => setComentario(e.target.value)}
-            rows={3}
-            className="w-full border rounded p-2"
-            placeholder="Escribe tu opinión aquí..."
-          />
-        </div>
-
-        <button
-          onClick={handleEnviar}
-          disabled={enviando}
-          className="bg-[#FCA311] hover:bg-[#e6950e] text-white font-semibold px-6 py-2 rounded-md transition-all"
-        >
-          {enviando ? "Enviando..." : "Enviar comentario"}
-        </button>
-      </div>
+      )}
     </div>
   );
 }

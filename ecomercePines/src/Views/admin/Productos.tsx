@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import SideBar from "../../components/SideBar";
 import HeaderAdmi from "../../components/HeaderAdmi";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, FileSpreadsheet } from "lucide-react";
 import { exportProductsToExcel } from "../../utils/exportToExcel";
 import ProductForm, { ProductFormValues } from "../../components/ProductForm";
 import Toast from "../../components/Toast";
 import ConfirmModal from "../../components/ConfirmModal";
+
 
 type Producto = {
   id: number;
@@ -174,24 +175,27 @@ export default function ProductosPage() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">Productos</h1>
-              <p className="text-sm text-gray-400">
+              {/* <p className="text-sm text-gray-400">
                 Listado de productos disponibles en Chibiquiles
-              </p>
+              </p> */}
             </div>
             <div className="flex gap-2 items-center">
-              <button
-                onClick={handleCreate}
-                className="inline-flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 text-sm"
-              >
-                <Plus className="w-4 h-4" /> Añadir producto
-              </button>
-              <button
-                onClick={handleExportExcel}
-                className="inline-flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-lg hover:bg-slate-700 text-sm"
-              >
-                Descargar Excel
-              </button>
-            </div>
+  <button
+    onClick={handleCreate}
+    className="inline-flex items-center justify-center bg-slate-800 text-white w-10 h-10 rounded-lg hover:bg-slate-700"
+    title="Añadir producto"
+  >
+    <Plus className="w-5 h-5" />
+  </button>
+  <button
+    onClick={handleExportExcel}
+    className="inline-flex items-center justify-center bg-slate-800 text-white w-10 h-10 rounded-lg hover:bg-slate-700"
+    title="Exportar a Excel"
+  >
+    <FileSpreadsheet className="w-5 h-5" />
+  </button>
+</div>
+
           </div>
 
           {loading ? (
